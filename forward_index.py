@@ -26,8 +26,8 @@ for index, row in data.iterrows():
 # JSON is suitable for saving large dictionaries as text files
 
 # with open("forward_index.json", "w") as file:
-# json.dump(forward_index, file)
-
+# json.dump(forward_index, file,indent = 4)
+# indent formats the json file in a more readable way
 
 # Display a limited number of forward index entries (first 5 documents)
 '''for i, (doc_id, word_freq) in enumerate(forward_index.items()):
@@ -35,7 +35,7 @@ for index, row in data.iterrows():
         break
     print("Document ID:", doc_id)
     print("Word Frequencies:", word_freq)
-    print("-" * 40)  # Separator for readability
+    print("-" * 100 )  # Separator for readability
 '''
 
 # Display the forward index for the entire dataset
