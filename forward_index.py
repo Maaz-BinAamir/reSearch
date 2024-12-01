@@ -1,20 +1,20 @@
 import pandas as pd
 from collections import Counter
 
+# Reading the Processed Text from the CSV 
 csv_path = "processed_text.csv"
 data = pd.read_csv(csv_path)
 
+# Converting the processed_text back to a list
 data['processed_text'] = data['processed_text'].apply(eval)
 
-# Path to the lexicon CSV file
-lexicon_csv_path = "lexicon.csv"
+# Loading the CSV file into a DataFrame
+lexicon_df = pd.read_csv("lexicon.csv")
 
-# Load the CSV file into a DataFrame
-lexicon_df = pd.read_csv(lexicon_csv_path)
-
-# Convert the DataFrame back to a dictionary
+# Converting the DataFrame back to a dictionary
 lexicon = dict(zip(lexicon_df["Word"], lexicon_df["WordId"]))
 
+#Initializing forward_index (nested dict)
 forward_index = {}
 
 # Building the forward index
@@ -43,5 +43,4 @@ export_data = [
 df = pd.DataFrame(export_data)
 
 # Exporting the DataFrame to a CSV file
-output_csv_path = "forward_index.csv"
-df.to_csv(output_csv_path, index=False)
+df.to_csv("forward_index.csv", index=False)

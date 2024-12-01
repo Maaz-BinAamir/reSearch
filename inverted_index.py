@@ -1,18 +1,14 @@
 import pandas as pd
 import json
 
-# Path of the lexicon and forward_index CSVs
-lexicon_csv_path = "lexicon.csv"
-input_csv_path = "forward_index.csv"
-
 # Loading the CSV's into a DataFrame
-lexicon_df = pd.read_csv(lexicon_csv_path)
-forward_index_df = pd.read_csv(input_csv_path)
+lexicon_df = pd.read_csv("lexicon.csv")
+forward_index_df = pd.read_csv("forward_index.csv")
 
-# Convert the Lexicon's DataFrame back to lexicon (dict)
+# Converting the Lexicon's DataFrame back to lexicon (dict)
 lexicon = dict(zip(lexicon_df["Word"], lexicon_df["WordId"]))
 
-# Convert the Forward Index's DataFrame back to forward_index (nested dict)
+# Converting the Forward Index's DataFrame back to forward_index (nested dict)
 forward_index = {}
 forward_index_df['word_counts'] = forward_index_df['word_counts'].apply(eval)
 
@@ -21,6 +17,7 @@ for _, row in forward_index_df.iterrows():
     
     forward_index[row['DocumentID']] = word_counts
 
+#Initializing inverted_index (dict)
 inverted_index = {}
 
 def make_inverted_index():
