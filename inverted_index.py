@@ -1,7 +1,5 @@
 import pandas as pd
 import json
-from lexicon import lexicon
-from forward_index import forward_index
 
 # Path of the lexicon and forward_index CSVs
 lexicon_csv_path = "lexicon.csv"
@@ -25,15 +23,18 @@ for _, row in forward_index_df.iterrows():
 
 inverted_index = {}
 
-# TODO: do something so that root word queries give derative results as well
-for word, word_id in lexicon.items():
-    for doc_id, word_count in forward_index.items():
-        if word_id in word_count:
-            if str(word_id) not in inverted_index:
-                inverted_index[str(word_id)] = [doc_id]
-            else:
-                inverted_index[str(word_id)].append(doc_id)
+def make_inverted_index():
+    for word, word_id in lexicon.items():
+        for doc_id, word_count in forward_index.items():
+            if word_id in word_count:
+                if str(word_id) not in inverted_index:
+                    inverted_index[str(word_id)] = [doc_id]
+                else:
+                    inverted_index[str(word_id)].append(doc_id)
                 
+make_inverted_index()
+
+# Converting inverted_index to a DataFrame for exporting
 export_data = [
     {"WordID": word_id, "DocumentIDs": json.dumps(doc_ids)}
     for word_id, doc_ids in inverted_index.items()

@@ -1,6 +1,5 @@
 import pandas as pd
 from collections import Counter
-import json
 
 csv_path = "processed_text.csv"
 data = pd.read_csv(csv_path)
@@ -35,11 +34,10 @@ make_forward_index()
 # Converting forward_index to a DataFrame for exporting
 export_data = []
 
-for doc_id, word_counts in forward_index.items():
-    export_data.append({
-        "DocumentID": doc_id,
-        "word_counts": word_counts
-    })
+export_data = [
+    {"DocumentID": doc_id, "word_counts": word_counts}
+    for doc_id, word_counts in forward_index.items()
+]
 
 # Creating a DataFrame
 df = pd.DataFrame(export_data)
