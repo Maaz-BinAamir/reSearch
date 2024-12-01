@@ -2,8 +2,7 @@ import pandas as pd
 from collections import Counter
 
 # Reading the Processed Text from the CSV 
-csv_path = "processed_text.csv"
-data = pd.read_csv(csv_path)
+data = pd.read_csv("processed_text.csv")
 
 # Converting the processed_text back to a list
 data['processed_text'] = data['processed_text'].apply(eval)

@@ -4,13 +4,12 @@ import pandas as pd
 lexicon = {}
 
 # Reading the Processed Text from the CSV 
-csv_path = "processed_text.csv"
-data = pd.read_csv(csv_path)
+data = pd.read_csv("processed_text.csv")
 
 # Converting the processed_text back to a list
 data['processed_text'] = data['processed_text'].apply(eval)
 
-def makeLexicon(column):
+def make_lexicon(column):
     id = 1
 
     for tokens in column:
@@ -21,7 +20,7 @@ def makeLexicon(column):
                 id += 1
 
 
-makeLexicon(data['processed_text'])
+make_lexicon(data['processed_text'])
     
 # Convert the lexicon dictionary to a DataFrame for exporting
 df = pd.DataFrame(list(lexicon.items()), columns=["Word", "WordId"])
