@@ -1,3 +1,4 @@
+import time
 import pandas as pd
 from nltk.tokenize import word_tokenize
 from nltk.stem import WordNetLemmatizer
@@ -60,9 +61,13 @@ def preprocess(text):
             
             processed_tokens.append(lemmatized_word.lower())
 
-    return processed_tokens
+    return " ".join(processed_tokens)
 
-data['text'] =  data['title'] + " " + data['abstract'] + " " + data['keywords']
-data['processed_text'] = data['text'].apply(preprocess)
 
-data['processed_text'].to_csv('processed_text.csv', index=False)
+data['title'] = data['title'].apply(preprocess)
+data ['abstract'] = data['abstract'].apply(preprocess)
+data ['keywords'] = data['keywords'].apply(lambda x: " ".join((eval(x))))
+
+columns_to_output = ['title', 'abstract', 'keywords']
+
+data[columns_to_output].to_csv('processed_text.csv', index=False)

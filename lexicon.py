@@ -6,8 +6,11 @@ lexicon = {}
 # Reading the Processed Text from the CSV 
 data = pd.read_csv("processed_text.csv")
 
-# Converting the processed_text back to a list
-data['processed_text'] = data['processed_text'].apply(eval)
+# Creating the 'processed_text' column by concatenating non-NaN values from 'title', 'abstract', and 'keywords'
+data['processed_text'] = data.apply(lambda row: " ".join([str(row[col]) for col in ['title', 'abstract', 'keywords'] if pd.notna(row[col])]), axis=1)
+
+# applying the split operation to the 'processed_text' column
+data['processed_text'] = data['processed_text'].apply(lambda x: x.split())
 
 def make_lexicon(column):
     id = 1
@@ -21,7 +24,7 @@ def make_lexicon(column):
 
 
 make_lexicon(data['processed_text'])
-    
+
 # Convert the lexicon dictionary to a DataFrame for exporting
 df = pd.DataFrame(list(lexicon.items()), columns=["Word", "WordId"])
 
