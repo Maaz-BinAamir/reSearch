@@ -5,3 +5,4 @@ forward_index.csv
 lexicon.csv
 inverted_index.csv
 barrels/
+test.py
