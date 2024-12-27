@@ -10,10 +10,8 @@ type SearchResult = {
 };
 
 export default function ResultItem({ result }: { result: SearchResult }) {
-  // Parse keywords string into array
   const parseKeywords = (keywordString: string) => {
     try {
-      // Remove single quotes and replace with double quotes for valid JSON
       const jsonString = keywordString
         .replace(/'/g, '"')
         .replace(/\s+/g, " ")
@@ -30,26 +28,36 @@ export default function ResultItem({ result }: { result: SearchResult }) {
     ? parseKeywords(result.keywords)
     : ["No keywords"];
 
-  // Function to validate if a string is a valid URL
-  const isValidUrl = (url: string) => {
-    const regex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
-    return regex.test(url);
+  const parseUrls = (urlString: string): string[] => {
+    // First try parsing as JSON array
+    try {
+      const sanitizedUrl = urlString
+        .trim()
+        .replace(/^['"]|['"]$/g, "")
+        .replace(/'/g, '"');
+      const parsed = JSON.parse(sanitizedUrl);
+      return Array.isArray(parsed) ? parsed : [urlString];
+    } catch {
+      // If not JSON, treat as single URL string
+      return [urlString.trim()];
+    }
   };
 
-  // Parse URLs into an array and validate them
-  let urls: string[] = [];
-  try {
-    const sanitizedUrl = result.url
-      .trim()
-      .replace(/^['"]|['"]$/g, "")
-      .replace(/'/g, '"');
-    const parsedUrls = JSON.parse(sanitizedUrl);
-    urls = parsedUrls.filter(isValidUrl);
-  } catch (error) {
-    console.error("Error parsing URLs:", error);
-  }
+  const isValidUrl = (url: string) => {
+    try {
+      // Check if string starts with a protocol
+      if (!/^https?:\/\//i.test(url)) {
+        url = "https://" + url;
+      }
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
 
-  // Function to truncate abstract if it exceeds 100 words
+  const urls = parseUrls(result.url || "").filter(isValidUrl);
+
   const truncateAbstract = (text: string, wordLimit: number) => {
     const words = text.split(/\s+/);
     if (words.length > wordLimit) {
@@ -85,7 +93,7 @@ export default function ResultItem({ result }: { result: SearchResult }) {
                 href={link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-blue-600 hover:underline text-sm"
+                className="text-blue-600 hover:underline text-sm break-all"
               >
                 Link {index + 1}
               </a>

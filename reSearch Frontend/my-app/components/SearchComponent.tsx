@@ -14,6 +14,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 type SearchResult = {
   title: string;
@@ -23,6 +31,13 @@ type SearchResult = {
   year: number;
   url: string;
 };
+
+type SearchResponse = {
+  output: SearchResult[];
+  total: number;
+};
+
+const RESULTS_PER_PAGE = 10;
 
 export default function SearchComponent() {
   const [query, setQuery] = useState("");
@@ -35,6 +50,8 @@ export default function SearchComponent() {
   const [sortBy, setSortBy] = useState<"relevance" | "year" | "citations">(
     "relevance"
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalResults, setTotalResults] = useState(0);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -152,7 +169,7 @@ export default function SearchComponent() {
     }
   };
 
-  const performSearch = async (searchQuery: string) => {
+  const performSearch = async (searchQuery: string, page: number = 1) => {
     setIsLoading(true);
     setResults([]);
     setFetchTime(null);
@@ -161,9 +178,13 @@ export default function SearchComponent() {
     try {
       const response = await axios.post("http://127.0.0.1:5000/api/process", {
         query: searchQuery,
+        page: page,
+        per_page: RESULTS_PER_PAGE,
       });
       if (response.status === 200) {
-        setResults(response.data.output || []);
+        const data: SearchResponse = response.data;
+        setResults(data.output || []);
+        setTotalResults(data.total);
       }
     } catch (error) {
       console.error("Search error:", error);
@@ -173,15 +194,22 @@ export default function SearchComponent() {
     }
   };
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    performSearch(query, page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     setSuggestions([]);
     setShowSuggestions(false);
     setSelectedIndex(-1);
+    setCurrentPage(1); // Reset to first page on new search
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    await performSearch(query);
+    await performSearch(query, 1);
   };
 
   const getSortedResults = useCallback(() => {
@@ -297,6 +325,78 @@ export default function SearchComponent() {
           </ul>
         </div>
       ) : null}
+
+      {results.length > 0 && (
+        <div className="mt-6">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() =>
+                    currentPage > 1 && handlePageChange(currentPage - 1)
+                  }
+                  className={`transition-colors hover:bg-primary/90 hover:text-primary-foreground ${
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }`}
+                />
+              </PaginationItem>
+
+              {[...Array(Math.ceil(totalResults / RESULTS_PER_PAGE))].map(
+                (_, i) => {
+                  const page = i + 1;
+                  if (
+                    page === 1 ||
+                    page === Math.ceil(totalResults / RESULTS_PER_PAGE) ||
+                    (page >= currentPage - 2 && page <= currentPage + 2)
+                  ) {
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink
+                          onClick={() => handlePageChange(page)}
+                          isActive={page === currentPage}
+                          className={`cursor-pointer transition-colors ${
+                            page === currentPage
+                              ? "hover:bg-primary/50"
+                              : "hover:bg-primary/30"
+                          }`}
+                        >
+                          {page}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  if (page === currentPage - 3 || page === currentPage + 3) {
+                    return (
+                      <PaginationItem key={page}>
+                        <PaginationLink className="cursor-default">
+                          ...
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+                  return null;
+                }
+              )}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    currentPage < Math.ceil(totalResults / RESULTS_PER_PAGE) &&
+                    handlePageChange(currentPage + 1)
+                  }
+                  className={`transition-colors hover:bg-primary/90 hover:text-primary-foreground ${
+                    currentPage >= Math.ceil(totalResults / RESULTS_PER_PAGE)
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }`}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
 
       <div className="mt-8 text-center animate-fade-in animation-delay-800">
         <Link href="/add-article">
