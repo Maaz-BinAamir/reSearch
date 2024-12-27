@@ -7,6 +7,13 @@ import ResultItem from "./ResultItem";
 import SkeletonLoader from "./SkeletonLoader";
 import Link from "next/link";
 import axios from "axios";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type SearchResult = {
   title: string;
@@ -25,6 +32,9 @@ export default function SearchComponent() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [sortBy, setSortBy] = useState<"relevance" | "year" | "citations">(
+    "relevance"
+  );
   const timeoutRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -174,6 +184,18 @@ export default function SearchComponent() {
     await performSearch(query);
   };
 
+  const getSortedResults = useCallback(() => {
+    if (sortBy === "relevance") return results;
+
+    return [...results].sort((a, b) => {
+      if (sortBy === "year") {
+        return b.year - a.year;
+      }
+      // citations
+      return Number(b.n_citation) - Number(a.n_citation);
+    });
+  }, [results, sortBy]);
+
   useEffect(() => {
     suggestionItemsRef.current = suggestionItemsRef.current.slice(
       0,
@@ -241,11 +263,28 @@ export default function SearchComponent() {
         <SkeletonLoader />
       ) : results.length > 0 ? (
         <div>
-          <h2 className="text-2xl font-semibold mb-4 animate-fade-in">
-            Search Results
-          </h2>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold animate-fade-in">
+              Search Results
+            </h2>
+            <Select
+              value={sortBy}
+              onValueChange={(value: "relevance" | "year" | "citations") =>
+                setSortBy(value)
+              }
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Sort by" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="relevance">Relevance</SelectItem>
+                <SelectItem value="year">Year</SelectItem>
+                <SelectItem value="citations">Citations</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <ul className="space-y-4">
-            {results.map((result, index) => (
+            {getSortedResults().map((result, index) => (
               <li
                 key={index}
                 className={`animate-fade-in animation-delay-${
