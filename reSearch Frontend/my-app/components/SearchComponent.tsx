@@ -39,7 +39,12 @@ type SearchResponse = {
 
 const RESULTS_PER_PAGE = 10;
 
-export default function SearchComponent() {
+type SearchComponentProps = {
+  toggleBookmark?: (article: any) => void;
+  bookmarks?: any[];
+};
+
+export default function SearchComponent({ toggleBookmark, bookmarks }: SearchComponentProps = {}) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -254,7 +259,7 @@ export default function SearchComponent() {
           onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
           className="flex-grow"
         />
-        <Button type="submit" disabled={isLoading}>
+        <Button className="bg-beige" type="submit" disabled={isLoading}>
           {isLoading ? "Searching..." : "Search"}
         </Button>
 
@@ -342,11 +347,12 @@ export default function SearchComponent() {
               {getSortedResults().map((result, index) => (
                 <li
                   key={index}
-                  className={`animate-fade-in animation-delay-${
-                    (index + 1) * 200
-                  }`}
                 >
-                  <ResultItem result={result} />
+                  <ResultItem 
+                    result={result} 
+                    toggleBookmark={toggleBookmark} 
+                    bookmarks={bookmarks}
+                  />
                 </li>
               ))}
             </ul>
@@ -428,7 +434,7 @@ export default function SearchComponent() {
 
       <div className="mt-8 text-center animate-fade-in animation-delay-800">
         <Link href="/add-article">
-          <Button>Add New Article</Button>
+          <Button className="bg-beige">Add New Article</Button>
         </Link>
       </div>
     </div>

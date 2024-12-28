@@ -74,9 +74,13 @@ body {
   }
   body {
     background-image: url("/image.png");
-    background-size: auto; /* Use the image's original size */
-    /* background-repeat: no-repeat; Prevent tiling */
-    background-position: top center; /* Align image to the top center */
-    background-attachment: scroll; /* Make sure the background scrolls */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-attachment: fixed;
   }
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
 }
