@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import toast from "react-hot-toast";
-import { ArrowUpCircle } from "lucide-react";
+import { ArrowUpCircle, ArrowLeft } from "lucide-react"; // Add ArrowLeft import
 
 export default function AddArticlePage() {
   const router = useRouter();
@@ -109,6 +109,15 @@ export default function AddArticlePage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4 sm:px-6 lg:px-8">
+      <Button
+        onClick={() => router.push("/")}
+        className="absolute top-4 left-4 gap-2 bg-secondary/80 hover:bg-secondary/60 text-secondary-foreground"
+        variant="outline"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back to Search
+      </Button>
+
       <div className="max-w-3xl mx-auto w-full">
         <div className="bg-card rounded-lg shadow-lg overflow-hidden">
           {/* Header */}
@@ -227,7 +236,11 @@ export default function AddArticlePage() {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full" disabled={isSubmitting}>
+              <Button
+                type="submit"
+                className="w-full bg-beige"
+                disabled={isSubmitting}
+              >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin mr-2 h-5 w-5 border-2 border-current border-t-transparent rounded-full" />

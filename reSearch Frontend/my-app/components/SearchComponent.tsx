@@ -7,6 +7,7 @@ import ResultItem from "./ResultItem";
 import SkeletonLoader from "./SkeletonLoader";
 import Link from "next/link";
 import axios from "axios";
+import { SearchResult, SearchResponse } from "../types/search";
 import {
   Select,
   SelectContent,
@@ -23,28 +24,17 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 
-type SearchResult = {
-  title: string;
-  abstract: string;
-  keywords: string;
-  n_citation: number;
-  year: number;
-  url: string;
-};
-
-type SearchResponse = {
-  output: SearchResult[];
-  total: number;
-};
-
 const RESULTS_PER_PAGE = 10;
 
 type SearchComponentProps = {
-  toggleBookmark?: (article: any) => void;
-  bookmarks?: any[];
+  toggleBookmark?: (article: SearchResult) => void;
+  bookmarks?: SearchResult[];
 };
 
-export default function SearchComponent({ toggleBookmark, bookmarks }: SearchComponentProps = {}) {
+export default function SearchComponent({
+  toggleBookmark,
+  bookmarks,
+}: SearchComponentProps = {}) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -58,6 +48,7 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
   const [hasSearched, setHasSearched] = useState(false);
+  const [lastSearchedQuery, setLastSearchedQuery] = useState("");
   const timeoutRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -146,12 +137,10 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
     setQuery(value);
     setSelectedIndex(-1);
 
-    // Clear any existing timeout
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
-    // Only show suggestions if we're not currently loading results
     if (!isLoading) {
       timeoutRef.current = setTimeout(() => {
         debouncedAutocomplete(value);
@@ -167,7 +156,6 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
     setShowSuggestions(false);
     setSelectedIndex(-1);
 
-    // Trigger search immediately with the new query
     performSearch(newQuery);
 
     if (inputRef.current) {
@@ -180,6 +168,7 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
     setResults([]);
     setFetchTime(null);
     setHasSearched(true);
+    setLastSearchedQuery(searchQuery);
 
     const startTime = performance.now();
     try {
@@ -212,7 +201,7 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
     setSuggestions([]);
     setShowSuggestions(false);
     setSelectedIndex(-1);
-    setCurrentPage(1); // Reset to first page on new search
+    setCurrentPage(1);
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
@@ -226,7 +215,6 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
       if (sortBy === "year") {
         return b.year - a.year;
       }
-      // citations
       return Number(b.n_citation) - Number(a.n_citation);
     });
   }, [results, sortBy]);
@@ -301,7 +289,8 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
           <div>
             <div className="mb-4">
               <h2 className="text-xl font-semibold mb-2">
-                Couldn&apos;t find any results  for &quot;{query}&quot;
+                Couldn&apos;t find any results for &quot;{lastSearchedQuery}
+                &quot;
               </h2>
               <p className="text-muted-foreground">
                 Here are the top 10 most cited articles:
@@ -309,13 +298,14 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
             </div>
             <ul className="space-y-4">
               {results.map((result, index) => (
-                <li
-                  key={index}
-                  className={`animate-fade-in animation-delay-${
-                    (index + 1) * 200
-                  }`}
-                >
-                  <ResultItem result={result} />
+                <li key={index}>
+                  <ResultItem
+                    result={result}
+                    toggleBookmark={toggleBookmark}
+                    isBookmarked={bookmarks?.some(
+                      (b) => b.title === result.title
+                    )}
+                  />
                 </li>
               ))}
             </ul>
@@ -323,9 +313,7 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
         ) : (
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-semibold animate-fade-in">
-                Search Results
-              </h2>
+              <h2 className="text-2xl font-semibold">Search Results</h2>
               <Select
                 value={sortBy}
                 onValueChange={(value: "relevance" | "year" | "citations") =>
@@ -345,13 +333,13 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
 
             <ul className="space-y-4">
               {getSortedResults().map((result, index) => (
-                <li
-                  key={index}
-                >
-                  <ResultItem 
-                    result={result} 
-                    toggleBookmark={toggleBookmark} 
-                    bookmarks={bookmarks}
+                <li key={index}>
+                  <ResultItem
+                    result={result}
+                    toggleBookmark={toggleBookmark}
+                    isBookmarked={bookmarks?.some(
+                      (b) => b.title === result.title
+                    )}
                   />
                 </li>
               ))}
@@ -431,12 +419,19 @@ export default function SearchComponent({ toggleBookmark, bookmarks }: SearchCom
           </Pagination>
         </div>
       )}
-
-      <div className="mt-8 text-center animate-fade-in animation-delay-800">
-        <Link href="/add-article">
-          <Button className="bg-beige">Add New Article</Button>
-        </Link>
-      </div>
+      {hasSearched ? (
+        <div className="fixed bottom-4 left-4 z-40">
+          <Link href="/add-article">
+            <Button className="bg-beige">Add New Article</Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-8 text-center animate-fade-in animation-delay-800">
+          <Link href="/add-article">
+            <Button className="bg-beige">Add New Article</Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

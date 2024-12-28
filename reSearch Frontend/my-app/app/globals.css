@@ -81,6 +81,44 @@ body {
   }
 }
 
+/* Custom Scrollbar Styles */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+}
+
+/* Remove scrollbar styles from BookmarkSidebar since it has its own */
+.scrollbar-custom {
+  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.scrollbar-custom::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari and Opera */
+}
+
 .animation-delay-200 {
   animation-delay: 200ms;
 }
