@@ -52,6 +52,7 @@ export default function SearchComponent() {
   );
   const [currentPage, setCurrentPage] = useState(1);
   const [totalResults, setTotalResults] = useState(0);
+  const [hasSearched, setHasSearched] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout>();
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
@@ -173,6 +174,7 @@ export default function SearchComponent() {
     setIsLoading(true);
     setResults([]);
     setFetchTime(null);
+    setHasSearched(true);
 
     const startTime = performance.now();
     try {
@@ -289,41 +291,67 @@ export default function SearchComponent() {
 
       {isLoading ? (
         <SkeletonLoader />
-      ) : results.length > 0 ? (
-        <div>
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-semibold animate-fade-in">
-              Search Results
-            </h2>
-            <Select
-              value={sortBy}
-              onValueChange={(value: "relevance" | "year" | "citations") =>
-                setSortBy(value)
-              }
-            >
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="relevance">Relevance</SelectItem>
-                <SelectItem value="year">Year</SelectItem>
-                <SelectItem value="citations">Citations</SelectItem>
-              </SelectContent>
-            </Select>
+      ) : hasSearched ? (
+        totalResults === 0 ? (
+          <div>
+            <div className="mb-4">
+              <h2 className="text-xl font-semibold mb-2">
+                Couldn&apos;t find any results  for &quot;{query}&quot;
+              </h2>
+              <p className="text-muted-foreground">
+                Here are the top 10 most cited articles:
+              </p>
+            </div>
+            <ul className="space-y-4">
+              {results.map((result, index) => (
+                <li
+                  key={index}
+                  className={`animate-fade-in animation-delay-${
+                    (index + 1) * 200
+                  }`}
+                >
+                  <ResultItem result={result} />
+                </li>
+              ))}
+            </ul>
           </div>
-          <ul className="space-y-4">
-            {getSortedResults().map((result, index) => (
-              <li
-                key={index}
-                className={`animate-fade-in animation-delay-${
-                  (index + 1) * 200
-                }`}
+        ) : (
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-semibold animate-fade-in">
+                Search Results
+              </h2>
+              <Select
+                value={sortBy}
+                onValueChange={(value: "relevance" | "year" | "citations") =>
+                  setSortBy(value)
+                }
               >
-                <ResultItem result={result} />
-              </li>
-            ))}
-          </ul>
-        </div>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="relevance">Relevance</SelectItem>
+                  <SelectItem value="year">Year</SelectItem>
+                  <SelectItem value="citations">Citations</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <ul className="space-y-4">
+              {getSortedResults().map((result, index) => (
+                <li
+                  key={index}
+                  className={`animate-fade-in animation-delay-${
+                    (index + 1) * 200
+                  }`}
+                >
+                  <ResultItem result={result} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
       ) : null}
 
       {results.length > 0 && (
