@@ -45,7 +45,7 @@ def save_barrels(barrels, base_path):
         barrel_df.to_parquet(barrel_path, index=False, engine="pyarrow")
         print(f"Barrel {i} saved to: {barrel_path}")
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     start_time = time.perf_counter()
     barrels = create_inverted_index()
     save_barrels(barrels, inverted_index_base_path)

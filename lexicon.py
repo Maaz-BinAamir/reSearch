@@ -4,7 +4,7 @@ import pandas as pd
 lexicon = {}
 
 # Reading the Processed Text from the CSV 
-data = pd.read_csv("processed_text.csv")
+data = pd.read_csv("D:\\code\\DSAProject\\reSearch\\processed_text_final.csv")
 
 # Creating the 'processed_text' column by concatenating non-NaN values from 'title', 'abstract', and 'keywords'
 data['processed_text'] = data.apply(lambda row: " ".join([str(row[col]) for col in ['title', 'abstract', 'keywords'] if pd.notna(row[col])]), axis=1)
@@ -25,9 +25,8 @@ def make_lexicon(column):
 
 make_lexicon(data['processed_text'])
 
-
 # Convert the lexicon dictionary to a DataFrame for exporting
 df = pd.DataFrame(list(lexicon.items()), columns=["Word", "WordId"])
 
 # Export the DataFrame to a CSV file
-df.to_csv("lexicon.csv", index=False)
+df.to_csv("D:\\code\\DSAProject\\reSearch\\lexicon.csv", index=False)

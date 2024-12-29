@@ -6,7 +6,7 @@ import nltk
 nltk.download('stopwords')
 
 # downloading the tokenizer model
-nltk.download('punkt')
+nltk.download('punkt_tab')
 
 # downloading wordnet which is used for lemmenization etc
 nltk.download('wordnet')

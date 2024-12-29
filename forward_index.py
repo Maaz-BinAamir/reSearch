@@ -98,7 +98,7 @@ def process_batch(data, byte_offsets):
     return forward_index
 
 
-if _name_ == "_main_":
+if __name__ == "__main__":
     # Batch processing loop
     batch_size = 10000
     chunk_number = 0
