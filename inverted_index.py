@@ -1,45 +1,53 @@
 import pandas as pd
-import json
+import orjson
+import time
+from collections import defaultdict
+import os
 
-# Loading the CSV's into a DataFrame
-lexicon_df = pd.read_csv("lexicon.csv")
-forward_index_df = pd.read_csv("forward_index.csv")
+# Paths to input forward index and output inverted index
+forward_index_path = "D:\\code\\DSAProject\\reSearch\\forward_index.csv"
+inverted_index_base_path = "D:\\code\\DSAProject\\reSearch\\barrels"
 
-# Converting the Lexicon's DataFrame back to lexicon (dict)
-lexicon = dict(zip(lexicon_df["Word"], lexicon_df["WordId"]))
+def create_inverted_index():
+    # Create 120 empty barrels
+    barrels = [defaultdict(list) for _ in range(120)]
 
-# Converting the Forward Index's DataFrame back to forward_index (nested dict)
-forward_index = {}
-forward_index_df['word_scores'] = forward_index_df['word_scores'].apply(eval)
+    forward_index = pd.read_csv(forward_index_path)
+    for _, row in forward_index.iterrows():
+        doc_id = row["DocumentID"]
+        byte_offset = row["byte_offset"]
+        length = orjson.loads(row["length"])
+        word_scores = orjson.loads(row["word_scores"])
 
-for _, row in forward_index_df.iterrows():
-    word_scores = row['word_scores']
-    
-    forward_index[row['DocumentID']] = word_scores
+        for word_id, data in word_scores.items():
+            # Determine barrel index
+            barrel_index = int(word_id) % 120  
+            barrels[barrel_index][word_id].append({
+                "DocumentID": doc_id,
+                "byte_offset": byte_offset,
+                "length": length,
+                "frequency": data["frequency"],
+            })
 
-#Initializing inverted_index (dict)
-inverted_index = {}
+    return barrels
 
-def make_inverted_index():
-    for word, word_id in lexicon.items():
-        for doc_id, word_scores in forward_index.items():
-            # check if the word_id of the word in lexicon exists in the document's word_scores dict
-            if word_id in word_scores:
-                if word_id not in inverted_index:
-                    inverted_index[word_id] = [(doc_id, word_scores[word_id])]
-                else:
-                    inverted_index[word_id].append((doc_id, word_scores[word_id]))
-                
-make_inverted_index()
+def save_barrels(barrels, base_path):
+    if not os.path.exists(base_path):
+        os.makedirs(base_path)
 
-# Converting inverted_index to a DataFrame for exporting
-export_data = [
-    {"WordId": word_id, "DocumentIds_score": json.dumps(doc_ids)}
-    for word_id, doc_ids in inverted_index.items()
-]
+    for i, barrel in enumerate(barrels):
+        barrel_path = os.path.join(base_path, f"barrel_{i}.parquet")
+        export_data = [
+            {"WordId": word_id, "DocumentDetails": orjson.dumps(details).decode("utf-8")}
+            for word_id, details in barrel.items()
+        ]
+        barrel_df = pd.DataFrame(export_data)
+        barrel_df.to_parquet(barrel_path, index=False, engine="pyarrow")
+        print(f"Barrel {i} saved to: {barrel_path}")
 
-# Creating a DataFrame
-df = pd.DataFrame(export_data)
-
-# Exporting the DataFrame to a CSV file
-df.to_csv("inverted_index.csv", index=False)
+if _name_ == "_main_":
+    start_time = time.perf_counter()
+    barrels = create_inverted_index()
+    save_barrels(barrels, inverted_index_base_path)
+    end_time = time.perf_counter()
+    print(f"Time taken: {end_time - start_time:.2f} seconds")
