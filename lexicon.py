@@ -25,6 +25,7 @@ def make_lexicon(column):
 
 make_lexicon(data['processed_text'])
 
+
 # Convert the lexicon dictionary to a DataFrame for exporting
 df = pd.DataFrame(list(lexicon.items()), columns=["Word", "WordId"])
 
