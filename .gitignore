@@ -6,3 +6,8 @@ lexicon.csv
 inverted_index.csv
 barrels/
 test.py
+cleaned_data_final.csv
+exported_data_final.csv
+processed_text_final.csv
+forward_index_with_positions.csv
+inverted_index_with_positions.csv

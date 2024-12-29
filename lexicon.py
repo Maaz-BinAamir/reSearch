@@ -1,8 +1,6 @@
 import pandas as pd
-
 # Initializing lexicon (dict)
 lexicon = {}
-
 # Reading the Processed Text from the CSV 
 data = pd.read_csv("D:\\code\\DSAProject\\reSearch\\processed_text_final.csv")
 
