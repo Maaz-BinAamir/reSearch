@@ -34,18 +34,32 @@ export default function ResultItem({
     : ["No keywords"];
 
   const isValidUrl = (url: string) => {
-    const regex = /^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i;
-    return regex.test(url);
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   let urls: string[] = [];
   try {
     const sanitizedUrl = result.url
-      .trim()
+      ?.trim()
       .replace(/^['"]|['"]$/g, "")
       .replace(/'/g, '"');
-    const parsedUrls = JSON.parse(sanitizedUrl);
-    urls = parsedUrls.filter(isValidUrl);
+    
+    if (sanitizedUrl) {
+      // Try parsing as JSON array first
+      try {
+        const parsedUrls = JSON.parse(sanitizedUrl);
+        urls = Array.isArray(parsedUrls) ? parsedUrls : [sanitizedUrl];
+      } catch {
+        // If not JSON, treat as single URL
+        urls = [sanitizedUrl];
+      }
+      urls = urls.filter(isValidUrl);
+    }
   } catch (error) {
     console.error("Error parsing URLs:", error);
   }

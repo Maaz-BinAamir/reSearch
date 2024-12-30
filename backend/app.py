@@ -36,8 +36,6 @@ def compute_bm25(query_terms, k1=1.5, b=0.75):
 
         term_row_no = math.floor(term_id / 120)
         barrel = {barrel_df.iloc[term_row_no]["WordId"]: orjson.loads(barrel_df.iloc[term_row_no]["DocumentDetails"])}
-        print(barrel)
-        print(term_id)
         if str(term_id) in barrel:
             print(f"Found term '{term}' in barrel.")
             postings = barrel[str(term_id)]
