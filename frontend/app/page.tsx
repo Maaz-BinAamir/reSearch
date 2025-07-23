@@ -65,7 +65,7 @@ export default function Home() {
       </AnimatePresence>
 
       <main className="flex min-h-screen flex-col items-center justify-center p-24 animate-fade-in">
-        <h1 className="mb-8 text-4xl font-bold text-primary animate-fade-in">
+        <h1 className="mb-8 text-5xl font-bold font-lobster text-primary animate-fade-in">
           reSearch
         </h1>
         <p className="mb-8 text-xl text-center font-lobster">
