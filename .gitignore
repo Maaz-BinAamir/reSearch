@@ -1,10 +1,10 @@
-__pycache__
 exported_data.csv
 processed_text.csv
 forward_index.csv
 lexicon.csv
 inverted_index.csv
 barrels/
+__pycache__/
 test.py
 cleaned_data_final.csv
 exported_data_final.csv
