@@ -48,7 +48,7 @@ export default function ResultItem({
       ?.trim()
       .replace(/^['"]|['"]$/g, "")
       .replace(/'/g, '"');
-    
+
     if (sanitizedUrl) {
       // Try parsing as JSON array first
       try {
@@ -106,8 +106,13 @@ export default function ResultItem({
         ))}
       </div>
       <div className="flex justify-between text-sm text-muted-foreground">
-        <span>Citations: {result.n_citation || "N/A"}</span>
-        <span>Year: {result.year || "Unknown"}</span>
+        <span>
+          <span className="font-bold">Citations:</span>{" "}
+          {result.n_citation || "N/A"}
+        </span>
+        <span>
+          <span className="font-bold">Year:</span> {result.year || "Unknown"}
+        </span>
       </div>
       <div className="flex flex-col space-y-1">
         {urls.length > 0

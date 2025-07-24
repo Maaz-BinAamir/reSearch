@@ -12,7 +12,8 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        beige: "rgba(89, 53, 21, 0.7)", // Custom beige color
+        beige: "rgba(89, 53, 21, 1)", // Custom beige color
+        "beige-light": "rgba(89, 53, 21, 0.8)", // Lighter beige for hover effects
         // You can also add it in the form of hsl or rgba if needed
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
